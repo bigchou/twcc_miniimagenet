@@ -23,8 +23,12 @@ dataset = ImageFolder(
     ])
 )
 
+
+num_workers = 0
+
+
 print("[1]")
-train_loader = torch.utils.data.DataLoader(dataset, batch_size=32)
+train_loader = torch.utils.data.DataLoader(dataset, batch_size=32,num_workers=num_workers)
 start = time.time()
 for item, label in train_loader:
     print(item[0,0,112,112])
@@ -76,7 +80,7 @@ class BalancedBatchSampler(torch.utils.data.sampler.Sampler):
         return self.balanced_max*len(self.keys)
 
 print("[2]")
-train_loader = torch.utils.data.DataLoader(dataset, sampler=BalancedBatchSampler(dataset), batch_size=32)
+train_loader = torch.utils.data.DataLoader(dataset, sampler=BalancedBatchSampler(dataset), batch_size=32,num_workers=num_workers)
 start = time.time()
 for item, label in train_loader:
     label = label.cpu().numpy()
