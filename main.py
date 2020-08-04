@@ -11,9 +11,28 @@ import numpy as np
 import torch.nn.functional as F
 from torch.utils.data.sampler import WeightedRandomSampler
 from collections import Counter
+import time
+
+dataset = ImageFolder(
+    "val",
+    transforms.Compose([
+        transforms.RandomResizedCrop(224),
+        transforms.RandomHorizontalFlip(),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406],std=[0.229, 0.224, 0.225])
+    ])
+)
+
+print("[1]")
+train_loader = torch.utils.data.DataLoader(dataset, batch_size=32)
+start = time.time()
+for item, label in train_loader:
+    print(item[0,0,112,112])
+print("elapsed:",time.time()-start)
 
 
 
+# ====================================================
 
 class BalancedBatchSampler(torch.utils.data.sampler.Sampler):
     # https://github.com/galatolofederico/pytorch-balanced-batch
@@ -56,28 +75,11 @@ class BalancedBatchSampler(torch.utils.data.sampler.Sampler):
     def __len__(self):
         return self.balanced_max*len(self.keys)
 
-
-
-dataset = ImageFolder(
-    "val",
-    transforms.Compose([
-        transforms.RandomResizedCrop(224),
-        transforms.RandomHorizontalFlip(),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=[0.485, 0.456, 0.406],std=[0.229, 0.224, 0.225])
-    ])
-)
-
-
+print("[2]")
 train_loader = torch.utils.data.DataLoader(dataset, sampler=BalancedBatchSampler(dataset), batch_size=32)
-
-
-import time
-
 start = time.time()
 for item, label in train_loader:
     label = label.cpu().numpy()
     result = np.where(label == 15)
     print(item[result[0],0,112,112])
-
 print("elapsed:",time.time()-start)
